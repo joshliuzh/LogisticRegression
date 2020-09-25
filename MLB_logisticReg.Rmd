@@ -1,0 +1,41 @@
+---
+title: ''
+author: "Josh"
+date: "9/23/2020"
+output: 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(8)
+```
+
+## 5.3. Logistic Regression
+
+This document is part of the project on the MLB Hall of Fame, done by Josh. This document is Section 5.3. Logistic Regression.
+
+In this model, instead of modeling the probability of a player being inducted, I model the probability of a single voter being supportive of the induction, $\hat{p}$. 
+
+
+
+
+```{r}
+dataset4 = read.csv('dataset4.csv')
+dataset4 = dataset4[complete.cases(dataset4),]
+train_index = sample(seq_len(nrow(dataset4)), size = floor(.8*nrow(dataset4)))
+trainSet = dataset4[train_index, ]
+testSet  = dataset4[-train_index, ]
+
+fullModel = glm(cbind(votes, ballots - votes) ~ weight + height + stint + G + AB + R + H + X2B + X3B + HR + RBI + SB + CS + BB + SO + IBB + HBP + SH + SF + GIDP + alive + active + age + yearsActive + bats + throws, family = binomial('logit'), data = trainSet)
+
+selectedModel = step(fullModel, direction = 'both', steps = 100, k = 2)
+summary(selectedModel)
+
+y_train_predicted = predict.glm(selectedModel, type = 'response')
+y_test_predicted = predict.glm(selectedModel, newdata = testSet, type = 'response')
+
+#table(trainSet$inducted, y_train_predicted>.25)
+#table(testSet$inducted, y_test_predicted>.15)
+summary(selectedModel)
+```
+
